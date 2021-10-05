@@ -18,7 +18,8 @@ git clone https://github.com/msys2/MINGW-packages.git "$DIR/.build/MINGW-package
 cd "$DIR/.build/MINGW-packages"
 git checkout f4c989755fdbca217e0c53c01a6206d36a9c3e0d
 
-for x in zlib winpthreads-git; do
+#for x in zlib gmp nettle winpthreads-git; do
+for x in zlib; do
   echo ""
   echo "---------"
   echo "building $x"
