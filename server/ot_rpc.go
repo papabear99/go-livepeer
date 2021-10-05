@@ -177,6 +177,10 @@ func runTranscode(n *core.LivepeerNode, orchAddr string, httpc *http.Client, not
 	start := time.Now()
 	tData, err = n.Transcoder.Transcode(md)
 	glog.V(common.VERBOSE).Infof("Transcoding done for taskId=%d url=%s dur=%v err=%v", notify.TaskId, notify.Url, time.Since(start), err)
+	if err != nil {
+		sendTranscodeResult(n, orchAddr, httpc, notify, contentType, &body, tData, err)
+		return
+	}
 	if err == nil && len(tData.Segments) != len(profiles) {
 		err = errors.New("segment / profile mismatch")
 		sendTranscodeResult(n, orchAddr, httpc, notify, contentType, &body, tData, err)
@@ -230,7 +234,9 @@ func sendTranscodeResult(n *core.LivepeerNode, orchAddr string, httpc *http.Clie
 	}
 	req, err := http.NewRequest("POST", "https://"+orchAddr+"/transcodeResults", body)
 	if err != nil {
-		glog.Error("Error posting results ", err)
+		glog.Errorf("Error posting results to orch=%s staskId=%d url=%s err=%v", orchAddr,
+			notify.TaskId, notify.Url, err)
+		return
 	}
 	req.Header.Set("Authorization", protoVerLPT)
 	req.Header.Set("Credentials", n.OrchSecret)
